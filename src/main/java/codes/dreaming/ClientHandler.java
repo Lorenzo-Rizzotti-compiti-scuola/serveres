@@ -25,6 +25,10 @@ public class ClientHandler implements Runnable {
                 if (line.matches("^\\S+ \\S+ \\S+$")) {
                     String[] parts = line.split(" ");
                     String filePath = parts[1];
+                    //remove first slash
+                    if (filePath.startsWith("/")) {
+                        filePath = filePath.substring(1);
+                    }
                     if (Files.exists(Paths.get(filePath))) {
                         System.out.println("File trovato: " + filePath);
                     } else {
