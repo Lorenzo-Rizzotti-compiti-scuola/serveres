@@ -1,10 +1,14 @@
 package codes.dreaming;
 
+import codes.dreaming.out.Packet;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ClientHandler implements Runnable {
@@ -16,7 +20,8 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+             PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
             String line;
             while (!(line = reader.readLine()).isEmpty()) {
                 System.out.println(line);
@@ -29,10 +34,13 @@ public class ClientHandler implements Runnable {
                     if (filePath.startsWith("/")) {
                         filePath = filePath.substring(1);
                     }
-                    if (Files.exists(Paths.get(filePath))) {
+                    Path path = Paths.get(filePath);
+                    if (Files.exists(path)) {
                         System.out.println("File trovato: " + filePath);
+                        writer.println(new Packet(200, Files.readString(path)).serialize());
                     } else {
                         System.out.println("File non trovato: " + filePath);
+                        writer.println(new Packet(404, "File non trovato").serialize());
                     }
                 }
             }
